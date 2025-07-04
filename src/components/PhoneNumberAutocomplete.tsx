@@ -38,7 +38,7 @@ export const PhoneNumberAutocomplete: React.FC<PhoneNumberAutocompleteProps> = (
   }, [value, previousNumbers]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value.replace(/\D/g, '').slice(0, 10); // Only digits, max 10
+    const newValue = e.target.value.replace(/\D/g, '').slice(0, 10); // Only digits, max 10, allow repeated digits
     onChange(newValue);
   };
 

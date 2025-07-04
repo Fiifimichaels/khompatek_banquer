@@ -21,6 +21,7 @@ export const detectNetworkFromNumber = (phoneNumber: string): string => {
 
 export const validateGhanaianNumber = (phoneNumber: string): boolean => {
   // Check if it's a valid 10-digit Ghanaian number with correct prefixes
+  // Allow double numbers (repeated digits)
   const pattern = /^0(24|54|25|59|20|50|27|57)[0-9]{7}$/;
   return pattern.test(phoneNumber);
 };

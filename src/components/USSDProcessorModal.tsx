@@ -220,7 +220,7 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
                 )}
                 {index === currentStep && currentStepData?.expectedInput && (
                   <div className="flex items-center space-x-2 mt-2">
-                    <span className="text-yellow-400">></span>
+                    <span className="text-yellow-400">&gt;</span>
                     <input
                       type={currentStepData.expectedInput === 'pin' ? 'password' : 'text'}
                       value={currentStepData.expectedInput === 'amount' ? amount : 

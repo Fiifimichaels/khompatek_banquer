@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TransactionButton } from '../components/TransactionButton';
-import { USSDProcessorModal } from '../components/USSDProcessorModal';
+import { AndroidDialerModal } from '../components/AndroidDialerModal';
 import { NetworkSIMSelector } from '../components/NetworkSIMSelector';
 import { PhoneNumberAutocomplete } from '../components/PhoneNumberAutocomplete';
 import { Logo } from '../components/Logo';
@@ -415,7 +415,7 @@ export const Dashboard: React.FC = () => {
       />
 
       {/* USSD Processor Modal */}
-      <USSDProcessorModal
+      <AndroidDialerModal
         isOpen={showProcessorModal}
         onClose={() => setShowProcessorModal(false)}
         ussdCode={currentUSSDCode}
@@ -429,8 +429,21 @@ export const Dashboard: React.FC = () => {
 
       {/* Processing Indicator */}
       {processing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-8 flex flex-col items-center max-w-sm mx-4">
+            <div className="flex items-center justify-between w-full mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Processing Transaction</h3>
+              <button
+                onClick={() => {
+                  setProcessing(false);
+                  setShowProcessorModal(false);
+                  setPendingTransaction(null);
+                }}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             <RotateCcw className="w-8 h-8 text-blue-600 animate-spin mb-4" />
             <p className="text-gray-700 font-medium text-center">Processing transaction...</p>
             <p className="text-sm text-gray-500 mt-2 text-center">Please wait while we process your request</p>

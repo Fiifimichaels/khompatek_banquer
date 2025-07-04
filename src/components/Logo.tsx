@@ -1,6 +1,5 @@
 import React from 'react';
-import { Smartphone, DollarSign } from 'lucide-react';
-import khompatekLogo from '../assets/khompatek_logo.png';
+import { Smartphone, Zap } from 'lucide-react';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -29,11 +28,9 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <img
-        src={khompatekLogo}
-        alt="Khompatek Logo"
-        className={`${sizeClasses[size]} rounded-xl shadow-lg object-contain`}
-      />
+      <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-teal-500 rounded-xl shadow-lg flex items-center justify-center`}>
+        <Zap className={`${sizeClasses[size === 'sm' ? 'sm' : size === 'md' ? 'sm' : size === 'lg' ? 'md' : 'lg']} text-white`} />
+      </div>
       
       {/* Logo Text */}
       {showText && (

@@ -55,53 +55,69 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
     switch (transactionType) {
       case 'cash_in':
         initialSteps = [
-          { id: '1', prompt: `Dialing *171*3*1*${phoneNumber}*${phoneNumber}*${amount}#...` },
-          { id: '2', prompt: `Cash In Request:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\nProcessing...` },
-          { id: '3', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '4', prompt: 'Transaction processing...' }
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Merchant Payment\n1. Pay Bill\n2. Buy Goods\n3. Send Money\n\nSelect option:', expectedInput: 'menu' },
+          { id: '4', prompt: 'Enter recipient number:', expectedInput: 'phone' },
+          { id: '5', prompt: 'Re-enter recipient number:', expectedInput: 'phone', requiresRepeat: true },
+          { id: '6', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '7', prompt: `Confirm Cash In:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '8', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '9', prompt: 'Transaction processing...' }
         ];
         break;
       case 'cash_out':
         initialSteps = [
-          { id: '1', prompt: `Dialing *171*2*1*${phoneNumber}*${phoneNumber}*${amount}#...` },
-          { id: '2', prompt: `Cash Out Request:\nAmount: GHS ${amount}\nFrom: ${phoneNumber}\n\nProcessing...` },
-          { id: '3', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '4', prompt: 'Transaction processing...' }
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Cash Out\n1. Withdraw from Agent\n2. ATM Withdrawal\n\nSelect option:', expectedInput: 'menu' },
+          { id: '4', prompt: 'Enter sender number:', expectedInput: 'phone' },
+          { id: '5', prompt: 'Re-enter sender number:', expectedInput: 'phone', requiresRepeat: true },
+          { id: '6', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '7', prompt: `Confirm Cash Out:\nAmount: GHS ${amount}\nFrom: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '8', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '9', prompt: 'Transaction processing...' }
         ];
         break;
       case 'airtime_transfer':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Airtime Transfer\n1. Transfer Airtime\n2. Buy for Self\n\nSelect option:' },
-          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Airtime & Bundle\n1. Buy Airtime\n2. Buy Bundle\n3. Transfer Airtime\n\nSelect option:', expectedInput: 'menu' },
           { id: '4', prompt: 'Enter recipient number:', expectedInput: 'phone' },
           { id: '5', prompt: 'Re-enter recipient number:', expectedInput: 'phone', requiresRepeat: true },
-          { id: '6', prompt: `Confirm Airtime Transfer:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
-          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '8', prompt: 'Transfer processing...' }
+          { id: '6', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '7', prompt: `Confirm Airtime Transfer:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '8', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '9', prompt: 'Transfer processing...' }
         ];
         break;
       case 'pay_merchant':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Pay Merchant\n1. Pay Bill\n2. Pay Merchant\n\nSelect option:' },
-          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Merchant Payment\n1. Pay Bill\n2. Buy Goods\n\nSelect option:', expectedInput: 'menu' },
           { id: '4', prompt: 'Enter merchant code:', expectedInput: 'phone' },
-          { id: '5', prompt: `Confirm Payment:\nAmount: GHS ${amount}\nMerchant: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
-          { id: '6', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '7', prompt: 'Payment processing...' }
+          { id: '5', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '6', prompt: `Confirm Payment:\nAmount: GHS ${amount}\nMerchant: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '8', prompt: 'Payment processing...' }
         ];
         break;
       case 'balance':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Your account balance is:\nGHS 1,250.75\n\nCommission: GHS 127.50\nPress 0 to return to main menu' }
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Financial Services\n1. Check Balance\n2. Mini Statement\n3. Change PIN\n\nSelect option:', expectedInput: 'menu' },
+          { id: '4', prompt: 'Your account balance is:\nGHS 1,250.75\n\nCommission: GHS 127.50\nPress 0 to return to main menu' }
         ];
         break;
       case 'commission':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Commission Summary:\nToday: GHS 45.20\nThis Week: GHS 127.50\nThis Month: GHS 485.75\n\nPress 0 to return to main menu' }
+          { id: '1', prompt: `Dialing *171#...` },
+          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. Cash Out\n3. Merchant Payment\n4. Airtime & Bundle\n5. Financial Services\n\nSelect option:', expectedInput: 'menu' },
+          { id: '3', prompt: 'Financial Services\n1. Check Balance\n2. Mini Statement\n3. Change PIN\n\nSelect option:', expectedInput: 'menu' },
+          { id: '4', prompt: 'Commission Summary:\nToday: GHS 45.20\nThis Week: GHS 127.50\nThis Month: GHS 485.75\n\nPress 0 to return to main menu' }
         ];
         break;
       default:
@@ -119,10 +135,7 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
     setTimeout(() => {
       if (transactionType === 'balance' || transactionType === 'commission') {
         setCurrentStep(1);
-        // Auto-complete for balance/commission checks
-        setTimeout(() => {
-          onComplete(true, `KHM${Date.now()}`);
-        }, 3000);
+        // Start the menu navigation for balance/commission
       } else {
         setCurrentStep(1);
       }
@@ -132,13 +145,46 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
   const handleStepResponse = () => {
     const step = steps[currentStep];
     
-    // Handle menu selection (step 2 for most transactions)
-    if (currentStep === 1 && !step.expectedInput) {
+    // Handle menu selections
+    if (step.expectedInput === 'menu') {
+      let menuResponse = '1'; // Default selection
+      
+      // Determine correct menu response based on transaction type and step
+      if (currentStep === 1) { // Main menu
+        switch (transactionType) {
+          case 'cash_in': menuResponse = '3'; break; // Merchant Payment
+          case 'cash_out': menuResponse = '2'; break; // Cash Out
+          case 'airtime_transfer': menuResponse = '4'; break; // Airtime & Bundle
+          case 'pay_merchant': menuResponse = '3'; break; // Merchant Payment
+          case 'balance':
+          case 'commission': menuResponse = '5'; break; // Financial Services
+        }
+      } else if (currentStep === 2) { // Sub menu
+        switch (transactionType) {
+          case 'cash_in': menuResponse = '3'; break; // Send Money
+          case 'cash_out': menuResponse = '1'; break; // Withdraw from Agent
+          case 'airtime_transfer': menuResponse = '3'; break; // Transfer Airtime
+          case 'pay_merchant': menuResponse = '2'; break; // Buy Goods
+          case 'balance': menuResponse = '1'; break; // Check Balance
+          case 'commission': menuResponse = '2'; break; // Mini Statement (for commission)
+        }
+      }
+      
       setSteps(prev => prev.map((s, i) => 
-        i === currentStep ? { ...s, response: '1' } : s
+        i === currentStep ? { ...s, response: menuResponse } : s
       ));
       setCurrentInput('');
       setCurrentStep(prev => prev + 1);
+      
+      // Auto-complete for balance/commission after final menu selection
+      if ((transactionType === 'balance' || transactionType === 'commission') && currentStep === 2) {
+        setTimeout(() => {
+          setCurrentStep(prev => prev + 1);
+          setTimeout(() => {
+            onComplete(true, `KHM${Date.now()}`);
+          }, 2000);
+        }, 1500);
+      }
     } else if (step.expectedInput === 'amount') {
       setSteps(prev => prev.map((s, i) => 
         i === currentStep ? { ...s, response: amount } : s
@@ -317,9 +363,10 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
             >
               <ArrowRight className="w-5 h-5" />
               <span>
-                {currentStepData?.isConfirmation ? 'Confirm' : 
+                {currentStepData?.expectedInput === 'menu' ? 'Select' :
+                 currentStepData?.isConfirmation ? 'Confirm' : 
                  currentStepData?.requiresRepeat ? 'Verify' :
-                 currentStep === 1 ? 'Select' : 'Send'}
+                 'Send'}
               </span>
             </button>
           ) : (
@@ -346,8 +393,8 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
         {/* Instructions */}
         <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
           <p className="text-xs text-yellow-800">
-            <strong>Simulated USSD:</strong> This simulates the actual USSD flow. In production, 
-            this would interface with the device's USSD capabilities using SIM {simSlot}.
+            <strong>Real USSD Flow:</strong> This simulates the exact process of dialing *171# and 
+            navigating through the menus step by step, just like on a real device using SIM {simSlot}.
           </p>
         </div>
       </div>

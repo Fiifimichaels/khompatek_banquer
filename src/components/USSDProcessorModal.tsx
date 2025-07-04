@@ -7,6 +7,7 @@ interface USSDStep {
   prompt: string;
   response?: string;
   isConfirmation?: boolean;
+  requiresRepeat?: boolean;
   expectedInput?: 'amount' | 'phone' | 'pin' | 'confirmation';
 }
 
@@ -39,6 +40,7 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
   const [currentInput, setCurrentInput] = useState('');
   const [sessionActive, setSessionActive] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [repeatPhoneNumber, setRepeatPhoneNumber] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -54,31 +56,60 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
       case 'cash_in':
         initialSteps = [
           { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Enter amount:', expectedInput: 'amount' },
-          { id: '3', prompt: 'Enter recipient number:', expectedInput: 'phone' },
-          { id: '4', prompt: 'Confirm transaction details:', isConfirmation: true },
-          { id: '5', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '6', prompt: 'Transaction processing...' }
+          { id: '2', prompt: 'Cash In\n1. Send Money\n2. Buy Airtime\n\nSelect option:' },
+          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '4', prompt: 'Enter recipient number:', expectedInput: 'phone' },
+          { id: '5', prompt: 'Re-enter recipient number:', expectedInput: 'phone', requiresRepeat: true },
+          { id: '6', prompt: `Confirm Cash In:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '8', prompt: 'Transaction processing...' }
         ];
         break;
       case 'cash_out':
         initialSteps = [
           { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Enter amount:', expectedInput: 'amount' },
-          { id: '3', prompt: 'Enter sender number:', expectedInput: 'phone' },
-          { id: '4', prompt: 'Confirm transaction details:', isConfirmation: true },
-          { id: '5', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '6', prompt: 'Transaction processing...' }
+          { id: '2', prompt: 'Cash Out\n1. Withdraw Money\n2. Check Balance\n\nSelect option:' },
+          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '4', prompt: 'Enter sender number:', expectedInput: 'phone' },
+          { id: '5', prompt: 'Re-enter sender number:', expectedInput: 'phone', requiresRepeat: true },
+          { id: '6', prompt: `Confirm Cash Out:\nAmount: GHS ${amount}\nFrom: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '8', prompt: 'Transaction processing...' }
         ];
         break;
       case 'airtime_transfer':
         initialSteps = [
           { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Enter amount:', expectedInput: 'amount' },
-          { id: '3', prompt: 'Enter recipient number:', expectedInput: 'phone' },
-          { id: '4', prompt: 'Confirm airtime transfer:', isConfirmation: true },
-          { id: '5', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '6', prompt: 'Transfer processing...' }
+          { id: '2', prompt: 'Airtime Transfer\n1. Transfer Airtime\n2. Buy for Self\n\nSelect option:' },
+          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '4', prompt: 'Enter recipient number:', expectedInput: 'phone' },
+          { id: '5', prompt: 'Re-enter recipient number:', expectedInput: 'phone', requiresRepeat: true },
+          { id: '6', prompt: `Confirm Airtime Transfer:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '8', prompt: 'Transfer processing...' }
+        ];
+        break;
+      case 'pay_merchant':
+        initialSteps = [
+          { id: '1', prompt: `Dialing ${ussdCode}...` },
+          { id: '2', prompt: 'Pay Merchant\n1. Pay Bill\n2. Pay Merchant\n\nSelect option:' },
+          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
+          { id: '4', prompt: 'Enter merchant code:', expectedInput: 'phone' },
+          { id: '5', prompt: `Confirm Payment:\nAmount: GHS ${amount}\nMerchant: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
+          { id: '6', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '7', prompt: 'Payment processing...' }
+        ];
+        break;
+      case 'balance':
+        initialSteps = [
+          { id: '1', prompt: `Dialing ${ussdCode}...` },
+          { id: '2', prompt: 'Your account balance is:\nGHS 1,250.75\n\nCommission: GHS 127.50\nPress 0 to return to main menu' }
+        ];
+        break;
+      case 'commission':
+        initialSteps = [
+          { id: '1', prompt: `Dialing ${ussdCode}...` },
+          { id: '2', prompt: 'Commission Summary:\nToday: GHS 45.20\nThis Week: GHS 127.50\nThis Month: GHS 485.75\n\nPress 0 to return to main menu' }
         ];
         break;
       default:
@@ -94,25 +125,59 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
     
     // Auto-advance to first input step
     setTimeout(() => {
-      setCurrentStep(1);
+      if (transactionType === 'balance' || transactionType === 'commission') {
+        setCurrentStep(1);
+        // Auto-complete for balance/commission checks
+        setTimeout(() => {
+          onComplete(true, `KHM${Date.now()}`);
+        }, 3000);
+      } else {
+        setCurrentStep(1);
+      }
     }, 1500);
   };
 
   const handleStepResponse = () => {
     const step = steps[currentStep];
     
-    if (step.expectedInput === 'amount') {
+    // Handle menu selection (step 2 for most transactions)
+    if (currentStep === 1 && !step.expectedInput) {
+      setSteps(prev => prev.map((s, i) => 
+        i === currentStep ? { ...s, response: '1' } : s
+      ));
+      setCurrentInput('');
+      setCurrentStep(prev => prev + 1);
+    } else if (step.expectedInput === 'amount') {
       setSteps(prev => prev.map((s, i) => 
         i === currentStep ? { ...s, response: amount } : s
       ));
       setCurrentInput('');
       setCurrentStep(prev => prev + 1);
-    } else if (step.expectedInput === 'phone') {
+    } else if (step.expectedInput === 'phone' && !step.requiresRepeat) {
       setSteps(prev => prev.map((s, i) => 
         i === currentStep ? { ...s, response: phoneNumber } : s
       ));
       setCurrentInput('');
       setCurrentStep(prev => prev + 1);
+    } else if (step.expectedInput === 'phone' && step.requiresRepeat) {
+      // Handle repeat number entry
+      if (currentInput === phoneNumber) {
+        setSteps(prev => prev.map((s, i) => 
+          i === currentStep ? { ...s, response: currentInput } : s
+        ));
+        setCurrentInput('');
+        setCurrentStep(prev => prev + 1);
+      } else {
+        // Numbers don't match - show error and stay on same step
+        setSteps(prev => prev.map((s, i) => 
+          i === currentStep ? { 
+            ...s, 
+            prompt: `Numbers don't match!\n\nRe-enter recipient number:`,
+            response: undefined 
+          } : s
+        ));
+        setCurrentInput('');
+      }
     } else if (step.isConfirmation) {
       setSteps(prev => prev.map((s, i) => 
         i === currentStep ? { ...s, response: '1' } : s
@@ -229,20 +294,14 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
                       onChange={(e) => setCurrentInput(e.target.value)}
                       className="bg-transparent border-none outline-none text-green-400 flex-1"
                       placeholder={currentStepData.expectedInput === 'pin' ? 'Enter PIN' : 'Type here...'}
-                      readOnly={currentStepData.expectedInput === 'amount' || currentStepData.expectedInput === 'phone'}
+                      readOnly={currentStepData.expectedInput === 'amount' || (currentStepData.expectedInput === 'phone' && !currentStepData.requiresRepeat)}
                       autoFocus
                     />
                   </div>
                 )}
                 {index === currentStep && currentStepData?.isConfirmation && (
                   <div className="mt-2 p-2 bg-gray-800 rounded">
-                    <div className="text-yellow-400 text-xs mb-2">Confirm transaction:</div>
-                    <div className="text-white text-xs">
-                      Amount: GHS {amount}<br/>
-                      Number: {phoneNumber}<br/>
-                      Network: {network}
-                    </div>
-                    <div className="text-green-400 mt-2">Press 1 to confirm, 2 to cancel</div>
+                    <div className="text-green-400 text-xs">Press 1 to confirm, 2 to cancel</div>
                   </div>
                 )}
               </div>
@@ -258,14 +317,18 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
 
         {/* Action Buttons */}
         <div className="flex space-x-3">
-          {currentStepData?.expectedInput || currentStepData?.isConfirmation ? (
+          {(currentStepData?.expectedInput || currentStepData?.isConfirmation || (currentStep === 1 && !currentStepData?.expectedInput)) ? (
             <button
               onClick={handleStepResponse}
               disabled={processing}
               className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               <ArrowRight className="w-5 h-5" />
-              <span>Send</span>
+              <span>
+                {currentStepData?.isConfirmation ? 'Confirm' : 
+                 currentStepData?.requiresRepeat ? 'Verify' :
+                 currentStep === 1 ? 'Select' : 'Send'}
+              </span>
             </button>
           ) : (
             <button

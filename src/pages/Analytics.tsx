@@ -1,9 +1,29 @@
 import React, { useMemo } from 'react';
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { TrendingUp, DollarSign, Users, Target, Calendar, Clock, Smartphone } from 'lucide-react';
+import { DateRangeClearModal } from '../components/DateRangeClearModal';
+import { TrendingUp, DollarSign, Users, Target, Calendar, Clock, Smartphone, Trash2 } from 'lucide-react';
 
 export const Analytics: React.FC = () => {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
+  const [showClearModal, setShowClearModal] = useState(false);
+
+  const handleClearAnalytics = (startDate: Date, endDate: Date) => {
+    // Filter out transactions within the date range
+    const filteredTransactions = state.transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.timestamp);
+      return transactionDate < startDate || transactionDate > endDate;
+    });
+
+    // Update state with filtered transactions
+    dispatch({
+      type: 'LOAD_STATE',
+      payload: {
+        ...state,
+        transactions: filteredTransactions
+      }
+    });
+  };
 
   const analytics = useMemo(() => {
     const transactions = state.transactions;
@@ -115,7 +135,18 @@ export const Analytics: React.FC = () => {
 
   return (
     <div className="px-4 py-6 pb-24 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Analytics Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+        {state.transactions.length > 0 && (
+          <button
+            onClick={() => setShowClearModal(true)}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition-colors text-sm"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Clear</span>
+          </button>
+        )}
+      </div>
       
       {/* Today's Performance */}
       <div className="mb-8">
@@ -261,6 +292,15 @@ export const Analytics: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Clear Analytics Modal */}
+      <DateRangeClearModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onClear={handleClearAnalytics}
+        title="Clear Analytics Data"
+        description="This will permanently delete transaction data used for analytics from the selected date range. This action cannot be undone."
+      />
     </div>
   );
 };

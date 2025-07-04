@@ -12,6 +12,7 @@ interface AppState {
 type AppAction = 
   | { type: 'ADD_TRANSACTION'; payload: Transaction }
   | { type: 'UPDATE_TRANSACTION'; payload: { id: string; updates: Partial<Transaction> } }
+  | { type: 'CLEAR_TRANSACTIONS_BY_DATE'; payload: { startDate: Date; endDate: Date } }
   | { type: 'SET_CURRENT_TRANSACTION'; payload: Partial<Transaction> | null }
   | { type: 'ADD_USSD_CODE'; payload: USSDCode }
   | { type: 'UPDATE_USSD_CODE'; payload: { id: string; updates: Partial<USSDCode> } }
@@ -165,6 +166,14 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
         transactions: state.transactions.map(t => 
           t.id === action.payload.id ? { ...t, ...action.payload.updates } : t
         )
+      };
+    case 'CLEAR_TRANSACTIONS_BY_DATE':
+      return {
+        ...state,
+        transactions: state.transactions.filter(t => {
+          const transactionDate = new Date(t.timestamp);
+          return transactionDate < action.payload.startDate || transactionDate > action.payload.endDate;
+        })
       };
     case 'SET_CURRENT_TRANSACTION':
       return {

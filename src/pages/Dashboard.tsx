@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TransactionButton } from '../components/TransactionButton';
-import { USSDDialerModal } from '../components/USSDDialerModal';
+import { USSDProcessorModal } from '../components/USSDProcessorModal';
 import { NetworkSIMSelector } from '../components/NetworkSIMSelector';
+import { PhoneNumberAutocomplete } from '../components/PhoneNumberAutocomplete';
 import { Logo } from '../components/Logo';
 import { detectNetworkFromNumber, validateGhanaianNumber, getNetworkColor, getNetworkDisplayName } from '../utils/networkDetection';
 import { 
@@ -30,13 +31,19 @@ export const Dashboard: React.FC = () => {
   const [detectedNetwork, setDetectedNetwork] = useState('');
   const [showUSSDSelector, setShowUSSDSelector] = useState(false);
   const [selectedUSSDCode, setSelectedUSSDCode] = useState<string>('');
-  const [showDialerModal, setShowDialerModal] = useState(false);
+  const [showProcessorModal, setShowProcessorModal] = useState(false);
   const [showNetworkSelector, setShowNetworkSelector] = useState(false);
   const [currentUSSDCode, setCurrentUSSDCode] = useState('');
   const [currentTransactionType, setCurrentTransactionType] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [selectedSIM, setSelectedSIM] = useState(1);
   const [pendingTransaction, setPendingTransaction] = useState<any>(null);
+
+  // Get unique phone numbers from transaction history for autocomplete
+  const previousPhoneNumbers = React.useMemo(() => {
+    const numbers = state.transactions.map(t => t.phoneNumber);
+    return [...new Set(numbers)].sort();
+  }, [state.transactions]);
 
   useEffect(() => {
     setDetectedNetwork(detectNetworkFromNumber(phoneNumber));
@@ -123,27 +130,33 @@ export const Dashboard: React.FC = () => {
     // Add transaction to state
     dispatch({ type: 'ADD_TRANSACTION', payload: pendingTransaction.transaction });
 
-    // Show the dialer modal
-    setShowDialerModal(true);
+    // Show the processor modal
+    setShowProcessorModal(true);
     setProcessing(true);
+  };
 
-    // Simulate processing with realistic delay
-    setTimeout(() => {
-      const success = Math.random() > 0.05; // 95% success rate
+  const handleUSSDComplete = (success: boolean, reference?: string) => {
+    if (pendingTransaction) {
       dispatch({ 
         type: 'UPDATE_TRANSACTION', 
         payload: { 
           id: pendingTransaction.transaction.id, 
-          updates: { status: success ? 'completed' : 'failed' } 
+          updates: { 
+            status: success ? 'completed' : 'failed',
+            reference: reference || pendingTransaction.transaction.reference
+          } 
         } 
       });
-      setProcessing(false);
+    }
+    
+    setProcessing(false);
+    if (pendingTransaction) {
       if (pendingTransaction.type === 'custom_ussd') {
         setSelectedUSSDCode('');
         setShowUSSDSelector(false);
       }
       setPendingTransaction(null);
-    }, 2500);
+    }
   };
 
   const clearForm = () => {
@@ -207,15 +220,14 @@ export const Dashboard: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Phone Number:
             </label>
-            <input
-              type="tel"
+            <PhoneNumberAutocomplete
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={setPhoneNumber}
+              previousNumbers={previousPhoneNumbers}
               className={`w-full text-2xl font-bold border-0 bg-transparent focus:outline-none ${
                 isValidNumber ? 'text-gray-800' : 'text-red-600'
               } placeholder-gray-400`}
               placeholder="0244123456"
-              maxLength={10}
             />
             <div className="flex items-center justify-between mt-2">
               <div className="text-sm">
@@ -402,16 +414,17 @@ export const Dashboard: React.FC = () => {
         isPorted={isPorted}
       />
 
-      {/* USSD Dialer Modal */}
-      <USSDDialerModal
-        isOpen={showDialerModal}
-        onClose={() => setShowDialerModal(false)}
+      {/* USSD Processor Modal */}
+      <USSDProcessorModal
+        isOpen={showProcessorModal}
+        onClose={() => setShowProcessorModal(false)}
         ussdCode={currentUSSDCode}
         transactionType={currentTransactionType}
         amount={amount}
         phoneNumber={phoneNumber}
         network={getNetworkDisplayName(selectedNetwork)}
         simSlot={selectedSIM}
+        onComplete={handleUSSDComplete}
       />
 
       {/* Processing Indicator */}

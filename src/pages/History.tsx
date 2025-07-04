@@ -1,11 +1,30 @@
 import React from 'react';
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { DateRangeClearModal } from '../components/DateRangeClearModal';
 import { formatDistanceToNow } from '../utils/date';
-import { CheckCircle, XCircle, Clock, ArrowDownCircle, ArrowUpCircle, Radio, Code, CreditCard, Percent, Wallet } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, ArrowDownCircle, ArrowUpCircle, Radio, Code, CreditCard, Percent, Wallet, Trash2, Calendar } from 'lucide-react';
 
 export const History: React.FC = () => {
-  const { state } = useApp();
+  const { state, dispatch } = useApp();
+  const [showClearModal, setShowClearModal] = useState(false);
 
+  const handleClearHistory = (startDate: Date, endDate: Date) => {
+    // Filter out transactions within the date range
+    const filteredTransactions = state.transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.timestamp);
+      return transactionDate < startDate || transactionDate > endDate;
+    });
+
+    // Update state with filtered transactions
+    dispatch({
+      type: 'LOAD_STATE',
+      payload: {
+        ...state,
+        transactions: filteredTransactions
+      }
+    });
+  };
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'cash_in': return ArrowDownCircle;
@@ -42,8 +61,19 @@ export const History: React.FC = () => {
   };
 
   return (
-    <div className="px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Transaction History</h1>
+    <div className="px-4 py-6 pb-24 max-w-md mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Transaction History</h1>
+        {state.transactions.length > 0 && (
+          <button
+            onClick={() => setShowClearModal(true)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Clear</span>
+          </button>
+        )}
+      </div>
       
       {state.transactions.length === 0 ? (
         <div className="text-center py-12">
@@ -107,6 +137,15 @@ export const History: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Clear History Modal */}
+      <DateRangeClearModal
+        isOpen={showClearModal}
+        onClose={() => setShowClearModal(false)}
+        onClear={handleClearHistory}
+        title="Clear Transaction History"
+        description="This will permanently delete transaction records from the selected date range. This action cannot be undone."
+      />
     </div>
   );
 };

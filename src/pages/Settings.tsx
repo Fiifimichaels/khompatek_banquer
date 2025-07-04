@@ -164,6 +164,7 @@ export const Settings: React.FC = () => {
                           className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                           placeholder={`*123*{amount}*{phone}#`}
                           inputMode="text"
+                          pattern="[0-9*#{}a-zA-Z_]*"
                         />
                       </div>
                     ))}
@@ -260,6 +261,7 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                   inputMode="text"
+                  pattern="[0-9*#{}a-zA-Z_]*"
                 />
                 <input
                   type="text"
@@ -344,6 +346,7 @@ export const Settings: React.FC = () => {
                         onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                         inputMode="text"
+                        pattern="[0-9*#{}a-zA-Z_]*"
                       />
                       <input
                         type="text"

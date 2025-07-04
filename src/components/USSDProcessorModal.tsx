@@ -55,27 +55,18 @@ export const USSDProcessorModal: React.FC<USSDProcessorModalProps> = ({
     switch (transactionType) {
       case 'cash_in':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Welcome to MTN Mobile Money\n1. Transfer Money\n2. MoMo Pay & Pay Bill\n3. Airtime & Bundle\n4. Allow Cash Out\n\nSelect option:' },
-          { id: '3', prompt: 'Airtime & Bundle\n1. Buy Airtime\n2. Buy Bundle\n3. Share Bundle\n\nSelect option:' },
-          { id: '4', prompt: 'Enter recipient number:', expectedInput: 'phone' },
-          { id: '5', prompt: 'Re-enter recipient number:', expectedInput: 'phone', requiresRepeat: true },
-          { id: '6', prompt: 'Enter amount:', expectedInput: 'amount' },
-          { id: '7', prompt: `Confirm Cash In:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
-          { id: '8', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '9', prompt: 'Transaction processing...' }
+          { id: '1', prompt: `Dialing *171*3*1*${phoneNumber}*${phoneNumber}*${amount}#...` },
+          { id: '2', prompt: `Cash In Request:\nAmount: GHS ${amount}\nTo: ${phoneNumber}\n\nProcessing...` },
+          { id: '3', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '4', prompt: 'Transaction processing...' }
         ];
         break;
       case 'cash_out':
         initialSteps = [
-          { id: '1', prompt: `Dialing ${ussdCode}...` },
-          { id: '2', prompt: 'Cash Out\n1. Withdraw Money\n2. Check Balance\n\nSelect option:' },
-          { id: '3', prompt: 'Enter amount:', expectedInput: 'amount' },
-          { id: '4', prompt: 'Enter sender number:', expectedInput: 'phone' },
-          { id: '5', prompt: 'Re-enter sender number:', expectedInput: 'phone', requiresRepeat: true },
-          { id: '6', prompt: `Confirm Cash Out:\nAmount: GHS ${amount}\nFrom: ${phoneNumber}\n\n1. Confirm\n2. Cancel`, isConfirmation: true },
-          { id: '7', prompt: 'Enter your PIN:', expectedInput: 'pin' },
-          { id: '8', prompt: 'Transaction processing...' }
+          { id: '1', prompt: `Dialing *171*2*1*${phoneNumber}*${phoneNumber}*${amount}#...` },
+          { id: '2', prompt: `Cash Out Request:\nAmount: GHS ${amount}\nFrom: ${phoneNumber}\n\nProcessing...` },
+          { id: '3', prompt: 'Enter your PIN:', expectedInput: 'pin' },
+          { id: '4', prompt: 'Transaction processing...' }
         ];
         break;
       case 'airtime_transfer':

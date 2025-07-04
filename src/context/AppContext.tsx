@@ -84,7 +84,7 @@ const initialState: AppState = {
       type: 'cash_in',
       name: 'Cash In',
       networks: {
-        MTN: '*171#',
+        MTN: '*171*3*1*{phone}*{phone}*{amount}#',
         VODAFONE: '*110*01*1*{amount}*{phone}#',
         AIRTELTIGO: '*133*01*1*{amount}*{phone}#'
       },
@@ -95,7 +95,7 @@ const initialState: AppState = {
       type: 'cash_out',
       name: 'Cash Out',
       networks: {
-        MTN: '*170*01*2*{amount}*{phone}#',
+        MTN: '*171*2*1*{phone}*{phone}*{amount}#',
         VODAFONE: '*110*01*2*{amount}*{phone}#',
         AIRTELTIGO: '*133*01*2*{amount}*{phone}#'
       },

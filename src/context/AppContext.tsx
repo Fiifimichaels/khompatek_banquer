@@ -84,7 +84,7 @@ const initialState: AppState = {
       type: 'cash_in',
       name: 'Cash In',
       networks: {
-        MTN: '*170*01*1*{amount}*{phone}#',
+        MTN: '*171#',
         VODAFONE: '*110*01*1*{amount}*{phone}#',
         AIRTELTIGO: '*133*01*1*{amount}*{phone}#'
       },

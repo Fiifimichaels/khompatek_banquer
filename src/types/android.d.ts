@@ -10,6 +10,8 @@ declare global {
       isAutomationEnabled(): boolean;
       resetAutomation(): void;
       getAutomationStatus(): string;
+      isPinPromptActive(): boolean;
+      submitPin(pin: string): boolean;
       log(message: string): void;
     };
   }

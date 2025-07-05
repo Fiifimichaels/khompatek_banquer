@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Khompatek</string>
+    
+    <!-- Accessibility Service -->
+    <string name="accessibility_service_label">USSD Automation Service</string>
+    <string name="accessibility_service_description">
+        Automates USSD menu navigation for mobile money transactions. 
+        This service can read USSD dialogs and automatically input responses 
+        to complete transactions faster and more accurately.
+        
+        Features:
+        • Automatic menu navigation
+        • Phone number and amount input
+        • PIN entry automation
+        • Transaction confirmation
+        
+        The service only activates when USSD dialogs are detected and 
+        automation is enabled in the app settings.
+    </string>
+    
+    <!-- Colors -->
+    <color name="blue_600">#2563eb</color>
+    <color name="green_600">#16a34a</color>
+    <color name="red_600">#dc2626</color>
+    <color name="yellow_600">#ca8a04</color>
+    <color name="gray_600">#4b5563</color>
+</resources>

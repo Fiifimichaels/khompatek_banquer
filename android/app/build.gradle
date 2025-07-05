@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.khompatek'
+    namespace 'com.kbanquer2.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.khompatek"
+        applicationId "com.kbanquer2.app"
         minSdk 24
         targetSdk 34
         versionCode 1

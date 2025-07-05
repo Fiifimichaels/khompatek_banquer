@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Khompatek</string>
+    <string name="app_name">kBanquer-2.1</string>
     
     <!-- Accessibility Service -->
     <string name="accessibility_service_label">USSD Automation Service</string>

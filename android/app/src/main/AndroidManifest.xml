@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.khompatek">
+    package="com.kbanquer2.app">
 
     <!-- Required permissions -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -20,7 +20,7 @@
 
         <!-- Main Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.kbanquer2.app.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Khompatek.NoActionBar">
@@ -32,7 +32,7 @@
 
         <!-- Accessibility Settings Activity -->
         <activity
-            android:name="com.khompatek.ussd.AccessibilitySettingsActivity"
+            android:name="com.kbanquer2.app.ussd.AccessibilitySettingsActivity"
             android:exported="true"
             android:label="USSD Automation Settings"
             android:theme="@style/Theme.Khompatek">
@@ -44,7 +44,7 @@
 
         <!-- USSD Accessibility Service -->
         <service
-            android:name="com.khompatek.ussd.UssdAccessibilityService"
+            android:name="com.kbanquer2.app.ussd.UssdAccessibilityService"
             android:exported="true"
             android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">

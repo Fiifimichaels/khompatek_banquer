@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.khompatek.app',
-  appName: 'Khompatek',
+  appId: 'com.kbanquer2.app',
+  appName: 'kBanquer-2.1',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

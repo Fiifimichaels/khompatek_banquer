@@ -1,9 +1,9 @@
-package com.khompatek
+package com.kbanquer2.app
 
 import android.os.Bundle
 import android.webkit.WebView
 import com.getcapacitor.BridgeActivity
-import com.khompatek.ussd.UssdBridge
+import com.kbanquer2.app.ussd.UssdBridge
 
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

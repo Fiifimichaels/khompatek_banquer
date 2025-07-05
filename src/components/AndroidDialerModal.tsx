@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, X, ArrowLeft } from 'lucide-react';
+import { PinPromptModal } from './PinPromptModal';
 
 interface AndroidDialerModalProps {
   isOpen: boolean;
@@ -39,12 +40,33 @@ export const AndroidDialerModal: React.FC<AndroidDialerModalProps> = ({
   const [currentInput, setCurrentInput] = useState('');
   const [processing, setProcessing] = useState(false);
   const [sessionActive, setSessionActive] = useState(false);
+  const [showPinPrompt, setShowPinPrompt] = useState(false);
+  const [userPin, setUserPin] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       initializeUSSDSession();
     }
   }, [isOpen, transactionType]);
+
+  // Check for PIN prompt from Android service
+  useEffect(() => {
+    if (isOpen && window.UssdBridge) {
+      const checkPinPrompt = () => {
+        try {
+          const status = JSON.parse(window.UssdBridge.getAutomationStatus());
+          if (status.pinPromptActive && !showPinPrompt) {
+            setShowPinPrompt(true);
+          }
+        } catch (error) {
+          console.error('Error checking PIN prompt status:', error);
+        }
+      };
+
+      const interval = setInterval(checkPinPrompt, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [isOpen, showPinPrompt]);
 
   const initializeUSSDSession = () => {
     let initialSteps: USSDStep[] = [];
@@ -227,6 +249,41 @@ export const AndroidDialerModal: React.FC<AndroidDialerModalProps> = ({
     }
   };
 
+  const handlePinSubmit = (pin: string) => {
+    setUserPin(pin);
+    setShowPinPrompt(false);
+    
+    // Continue with the current step using the submitted PIN
+    if (currentStepData?.expectedInput === 'pin') {
+      setSteps(prev => prev.map((s, i) => 
+        i === currentStep ? { ...s, response: '****' } : s
+      ));
+      setCurrentInput('');
+      setCurrentStep(prev => prev + 1);
+      
+      // Start final processing
+      setProcessing(true);
+      setTimeout(() => {
+        const success = Math.random() > 0.05; // 95% success rate
+        const reference = `KHM${Date.now()}`;
+        setProcessing(false);
+        onComplete(success, reference);
+        
+        if (success) {
+          setSteps(prev => [...prev, {
+            id: 'success',
+            prompt: `✓ Transaction successful! Reference: ${reference}`
+          }]);
+        } else {
+          setSteps(prev => [...prev, {
+            id: 'error',
+            prompt: '✗ Transaction failed. Please try again.'
+          }]);
+        }
+      }, 3000);
+    }
+  };
+
   const handleInputSubmit = () => {
     const step = steps[currentStep];
     let inputValue = currentInput;
@@ -243,7 +300,41 @@ export const AndroidDialerModal: React.FC<AndroidDialerModalProps> = ({
         return;
       }
     } else if (step.inputType === 'pin') {
-      inputValue = '****';
+      // Check if we need to prompt for PIN
+      if (!userPin && (currentInput !== '1234' || currentInput === '')) {
+        setShowPinPrompt(true);
+        return;
+      }
+      
+      // Use the PIN we have
+      const pinToUse = userPin || currentInput || '1234';
+      setSteps(prev => prev.map((s, i) => 
+        i === currentStep ? { ...s, response: '****' } : s
+      ));
+      setCurrentInput('');
+      setCurrentStep(prev => prev + 1);
+      
+      // Start final processing
+      setProcessing(true);
+      setTimeout(() => {
+        const success = Math.random() > 0.05; // 95% success rate
+        const reference = `KHM${Date.now()}`;
+        setProcessing(false);
+        onComplete(success, reference);
+        
+        if (success) {
+          setSteps(prev => [...prev, {
+            id: 'success',
+            prompt: `✓ Transaction successful! Reference: ${reference}`
+          }]);
+        } else {
+          setSteps(prev => [...prev, {
+            id: 'error',
+            prompt: '✗ Transaction failed. Please try again.'
+          }]);
+        }
+      }, 3000);
+      return;
     }
 
     // Update current step with response
@@ -387,6 +478,16 @@ export const AndroidDialerModal: React.FC<AndroidDialerModalProps> = ({
             </button>
           </div>
         )}
+
+        {/* PIN Prompt Modal */}
+        <PinPromptModal
+          isOpen={showPinPrompt}
+          onClose={() => setShowPinPrompt(false)}
+          onSubmit={handlePinSubmit}
+          title="Enter Your Mobile Money PIN"
+          description="Please enter your mobile money PIN to complete this transaction."
+          isAndroidApp={!!window.UssdBridge}
+        />
       </div>
     </div>
   );

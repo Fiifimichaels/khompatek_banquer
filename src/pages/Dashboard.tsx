@@ -4,6 +4,7 @@ import { TransactionButton } from '../components/TransactionButton';
 import { AndroidDialerModal } from '../components/AndroidDialerModal';
 import { NetworkSIMSelector } from '../components/NetworkSIMSelector';
 import { PhoneNumberAutocomplete } from '../components/PhoneNumberAutocomplete';
+import { PinPromptModal } from '../components/PinPromptModal';
 import { Logo } from '../components/Logo';
 import { detectNetworkFromNumber, validateGhanaianNumber, getNetworkColor, getNetworkDisplayName } from '../utils/networkDetection';
 import { 
@@ -38,6 +39,8 @@ export const Dashboard: React.FC = () => {
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [selectedSIM, setSelectedSIM] = useState(1);
   const [pendingTransaction, setPendingTransaction] = useState<any>(null);
+  const [showPinPrompt, setShowPinPrompt] = useState(false);
+  const [pinPromptCallback, setPinPromptCallback] = useState<((pin: string) => void) | null>(null);
 
   // Get unique phone numbers from transaction history for autocomplete
   const previousPhoneNumbers = React.useMemo(() => {
@@ -48,6 +51,24 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     setDetectedNetwork(detectNetworkFromNumber(phoneNumber));
   }, [phoneNumber]);
+
+  // Check for Android PIN prompts
+  useEffect(() => {
+    if (window.UssdBridge) {
+      const checkPinPrompt = () => {
+        try {
+          if (window.UssdBridge.isPinPromptActive() && !showPinPrompt) {
+            setShowPinPrompt(true);
+          }
+        } catch (error) {
+          console.error('Error checking PIN prompt:', error);
+        }
+      };
+
+      const interval = setInterval(checkPinPrompt, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [showPinPrompt]);
 
   const getUSSDCodeForTransaction = (type: string, network: string) => {
     const config = state.transactionTypeConfigs.find(c => c.type === type);
@@ -60,6 +81,23 @@ export const Dashboard: React.FC = () => {
   const handleTransaction = async (type: string) => {
     if (!amount || !phoneNumber) return;
 
+    // Check if we need to prompt for PIN first
+    const needsPinPrompt = type !== 'balance' && type !== 'commission';
+    
+    if (needsPinPrompt && !window.UssdBridge) {
+      // For web version, prompt for PIN before proceeding
+      setPinPromptCallback(() => (pin: string) => {
+        proceedWithTransaction(type, pin);
+      });
+      setShowPinPrompt(true);
+      return;
+    }
+
+    // For Android or non-PIN transactions, proceed directly
+    proceedWithTransaction(type, '1234');
+  };
+
+  const proceedWithTransaction = async (type: string, userPin: string) => {
     let ussdCode = '';
     let networkToUse = isPorted ? 'UNIVERSAL' : detectedNetwork;
 
@@ -112,7 +150,8 @@ export const Dashboard: React.FC = () => {
       transaction,
       ussdCode,
       type,
-      networkToUse
+      networkToUse,
+      userPin
     });
 
     // Show network and SIM selector
@@ -127,8 +166,21 @@ export const Dashboard: React.FC = () => {
     setCurrentUSSDCode(pendingTransaction.ussdCode);
     setCurrentTransactionType(pendingTransaction.type);
 
+    // Use the PIN from the transaction
+    const transactionPin = pendingTransaction.userPin || '1234';
+
     // Add transaction to state
     dispatch({ type: 'ADD_TRANSACTION', payload: pendingTransaction.transaction });
+
+    // If we're in Android app, setup the transaction with the PIN
+    if (window.UssdBridge) {
+      window.UssdBridge.setupTransaction(
+        pendingTransaction.type,
+        phoneNumber,
+        amount,
+        transactionPin
+      );
+    }
 
     // Show the processor modal
     setShowProcessorModal(true);
@@ -164,6 +216,14 @@ export const Dashboard: React.FC = () => {
     setPhoneNumber('');
     setIsPorted(false);
     setSelectedUSSDCode('');
+  };
+
+  const handlePinPromptSubmit = (pin: string) => {
+    setShowPinPrompt(false);
+    if (pinPromptCallback) {
+      pinPromptCallback(pin);
+      setPinPromptCallback(null);
+    }
   };
 
   const isValidNumber = validateGhanaianNumber(phoneNumber);
@@ -450,6 +510,19 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* PIN Prompt Modal */}
+      <PinPromptModal
+        isOpen={showPinPrompt}
+        onClose={() => {
+          setShowPinPrompt(false);
+          setPinPromptCallback(null);
+        }}
+        onSubmit={handlePinPromptSubmit}
+        title="Enter Your Mobile Money PIN"
+        description="Please enter your mobile money PIN to proceed with the transaction."
+        isAndroidApp={!!window.UssdBridge}
+      />
     </div>
   );
 };
